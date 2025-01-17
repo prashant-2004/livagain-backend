@@ -40,7 +40,7 @@ local.properties
 node_modules/
 npm-debug.log
 yarn-error.log
-./models/livagain-65e42-firebase-adminsdk-lm702-1fd6300b08.json
+models/livagain-65e42-firebase-adminsdk-lm702-1fd6300b08.json
 
 # fastlane
 #
