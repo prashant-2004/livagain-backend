@@ -3,7 +3,7 @@ const cors = require('cors');
 const admin = require('firebase-admin');
 require('dotenv').config();
 
-var serviceAccount = require("./ServiceAccountKey.json");
+// var serviceAccount = require("./ServiceAccountKey.json");
 
 // Initialize Firebase Admin SDK
 admin.initializeApp({
@@ -127,6 +127,7 @@ app.get('/home', (req, res) => {
   res.status(200).json('Welcome, your app is working well');
 })
 
+app.get("/", (req, res) => res.send("Express on Vercel")); 
 // Start Server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
