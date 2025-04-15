@@ -127,7 +127,7 @@ app.get('/home', (req, res) => {
   res.status(200).json('Welcome, your app is working well');
 })
 
-app.get("/", (req, res) => res.send("Express on Vercel")); 
+app.get("/", (req, res) => res.send("Livagain-Server in on Vercel")); 
 // Start Server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
