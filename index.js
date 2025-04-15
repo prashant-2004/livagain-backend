@@ -123,6 +123,10 @@ app.post('/send-question-notification', async (req, res) => {
   }
 });
 
+app.get('/home', (req, res) => {
+  res.status(200).json('Welcome, your app is working well');
+})
+
 // Start Server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
