@@ -15,6 +15,7 @@ module.exports = (admin) => {
 
   // Auth Middleware (Add this to your existing auth setup)
   const auth = async (req, res, next) => {
+    console.log('authentcating...');
     try {
       const authHeader = req.headers.authorization;
       if (!authHeader?.startsWith('Bearer ')) {
@@ -37,6 +38,7 @@ module.exports = (admin) => {
 
 // Add this middleware to create wallet if not exists
 const ensureWalletExists = async (req, res, next) => {
+    console.log('ensure wallet');
     try {
       const walletRef = admin.firestore().collection('wallets').doc(req.user.uid);
       const doc = await walletRef.get();
@@ -48,6 +50,7 @@ const ensureWalletExists = async (req, res, next) => {
           createdAt: admin.firestore.FieldValue.serverTimestamp()
         });
       }
+      console.log("doc for wallet - ", doc);
       
       next();
     } catch (error) {
@@ -61,6 +64,7 @@ router.use(auth);
   
 // Get wallet balance and transactions
 router.get('/api/wallet', auth,ensureWalletExists, async (req, res) => {
+    console.log("WALLET Creation");
     try {
       const userId = req.user.uid;
       const walletRef = admin.firestore().collection('wallets').doc(userId);
