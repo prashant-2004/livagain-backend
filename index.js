@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
+const razorpayRoutes = require('./routes/RazorpayRoutes');
 require('dotenv').config();
 
 // var serviceAccount = require("./ServiceAccountKey.json");
@@ -58,7 +59,6 @@ app.post('/send-fcm', async (req, res) => {
     // Optionally, you can also handle the response to check if the message was sent successfully   
     res.status(200).json({ success: true, response });
   } catch (error) {
-    console.error('Backend FCM Error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
@@ -118,14 +118,15 @@ app.post('/send-question-notification', async (req, res) => {
     res.status(200).json({ success: true });
 
   } catch (error) {
-    console.error('Error sending notifications:', error);
     res.status(500).send('Error sending notifications');
   }
 });
 
 app.get('/home', (req, res) => {
   res.status(200).json('Welcome, your app is working well');
-})
+});
+
+
 
 app.get("/", (req, res) => res.send("Livagain-Server in on Vercel")); 
 // Start Server
@@ -133,6 +134,8 @@ const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
 });
+
+app.use('/api', razorpayRoutes);
 
 
 module.exports = app
