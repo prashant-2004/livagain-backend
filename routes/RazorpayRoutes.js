@@ -28,7 +28,7 @@ const razorpay = new Razorpay({
   };  
   
 // Get wallet balance and transactions
-router.get('/api/wallet', auth, async (req, res) => {
+router.post('/api/wallet', auth, async (req, res) => {
     try {
       const userId = req.user.uid;
       const walletRef = admin.firestore().collection('wallets').doc(userId);
