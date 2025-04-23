@@ -88,7 +88,6 @@ router.get('/wallet',ensureWalletExists, async (req, res) => {
   
       const transactions = transactionsSnapshot.docs.map(doc => ({
         id: doc.id,
-        userId: userId,
         ...doc.data(),
         date: doc.data().date.toDate()
       }));
@@ -180,7 +179,7 @@ router.post('/create-razorpay-order',ensureWalletExists, async (req, res) => {
     try {
       const { paymentId, amount } = req.body;
       const userId = req.user.uid; // From auth middleware
-  
+      let newBalance=0;
       // 1. Verify payment with Razorpay
       const payment = await razorpay.payments.fetch(paymentId);
       
@@ -200,10 +199,9 @@ router.post('/create-razorpay-order',ensureWalletExists, async (req, res) => {
         const walletDoc = await transaction.get(walletRef);
         
         // Initialize wallet if not exists
-        const newBalance = walletDoc.exists ? 
+        newBalance = walletDoc.exists ? 
           walletDoc.data().balance + amount : 
           amount;
-        console.log("my new balance - ",newBalance);
         if (walletDoc.exists) {
           transaction.update(walletRef, { balance: newBalance });
         } else {
