@@ -88,6 +88,7 @@ router.get('/wallet',ensureWalletExists, async (req, res) => {
   
       const transactions = transactionsSnapshot.docs.map(doc => ({
         id: doc.id,
+        userId: userId,
         ...doc.data(),
         date: doc.data().date.toDate()
       }));
@@ -202,7 +203,7 @@ router.post('/create-razorpay-order',ensureWalletExists, async (req, res) => {
         const newBalance = walletDoc.exists ? 
           walletDoc.data().balance + amount : 
           amount;
-  
+        console.log("my new balance - ",newBalance);
         if (walletDoc.exists) {
           transaction.update(walletRef, { balance: newBalance });
         } else {
