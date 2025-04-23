@@ -16,7 +16,7 @@ const razorpay = new Razorpay({
   const auth = async (req, res, next) => {
     try {
       const authHeader = req.headers.authorization;
-      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      if (!authHeader?.startsWith('Bearer ')) {
         return res.status(401).json({ error: 'Missing authorization header' });
       }
   
@@ -25,7 +25,11 @@ const razorpay = new Razorpay({
       req.user = { uid: decodedToken.uid };
       next();
     } catch (error) {
-      console.error('Auth error:', error);
+        console.error('Auth Error Details:', {
+            token: token?.slice(0, 50) + '...', // Log partial token for debugging
+            errorCode: error.code,
+            errorMessage: error.message
+          });
       res.status(401).send('Unauthorized');
     }
   };  
