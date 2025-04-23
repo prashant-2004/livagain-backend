@@ -140,7 +140,7 @@ app.get('/home', (req, res) => {
 });
 
 
-app.use('/api', razorpayRoutes);
+app.use('/api', razorpayRoutes(admin));
 
 app.get("/", (req, res) => res.send("Livagain-Server in on Vercel")); 
 // Start Server
