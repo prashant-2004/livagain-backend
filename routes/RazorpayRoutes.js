@@ -6,11 +6,12 @@ require('dotenv').config();
 
 module.exports = (admin) => {
     const router = express.Router();
-// Initialize Razorpay client
-const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET
-  });
+    // Initialize Razorpay client
+    const razorpay = new Razorpay({
+        key_id: process.env.RAZORPAY_KEY_ID,
+        key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+  let token='';
 
   // Auth Middleware (Add this to your existing auth setup)
   const auth = async (req, res, next) => {
@@ -20,7 +21,7 @@ const razorpay = new Razorpay({
         return res.status(401).json({ error: 'Missing authorization header' });
       }
   
-      const token = authHeader.split(' ')[1];
+      token = authHeader.split(' ')[1];
       const decodedToken = await admin.auth().verifyIdToken(token);
       req.user = { uid: decodedToken.uid };
       next();
