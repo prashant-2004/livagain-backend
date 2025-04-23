@@ -15,7 +15,9 @@ const razorpay = new Razorpay({
   const auth = async (req, res, next) => {
     try {
       const authHeader = req.headers.authorization;
-      if (!authHeader) return res.status(401).send('Unauthorized');
+      if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ error: 'Missing authorization header' });
+      }
   
       const token = authHeader.split(' ')[1];
       const decodedToken = await admin.auth().verifyIdToken(token);
@@ -26,9 +28,30 @@ const razorpay = new Razorpay({
       res.status(401).send('Unauthorized');
     }
   };  
+
+// Add this middleware to create wallet if not exists
+const ensureWalletExists = async (req, res, next) => {
+    try {
+      const walletRef = admin.firestore().collection('wallets').doc(req.user.uid);
+      const doc = await walletRef.get();
+      
+      if (!doc.exists) {
+        await walletRef.set({
+          balance: 0,
+          userId: req.user.uid,
+          createdAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+      }
+      
+      next();
+    } catch (error) {
+      console.error('Wallet creation error:', error);
+      res.status(500).send('Server Error');
+    }
+};
   
 // Get wallet balance and transactions
-router.post('/api/wallet', auth, async (req, res) => {
+router.post('/api/wallet', auth,ensureWalletExists, async (req, res) => {
     try {
       const userId = req.user.uid;
       const walletRef = admin.firestore().collection('wallets').doc(userId);
