@@ -3,6 +3,12 @@ const cors = require('cors');
 const admin = require('firebase-admin');
 const razorpayRoutes = require('./routes/RazorpayRoutes');
 require('dotenv').config();
+const corsOptions = {
+  origin: ['http://localhost:8081', 'http://192.168.1.*'],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
 
 // var serviceAccount = require("./ServiceAccountKey.json");
 
@@ -29,8 +35,15 @@ admin.initializeApp({
 //   });
 
 const app = express();
-app.use(cors());
+// app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log('Headers:', req.headers);
+  next();
+});
+
+app.use(cors(corsOptions));
 
 // FCM Send Endpoint for Chatting
 app.post('/send-fcm', async (req, res) => {
@@ -127,6 +140,7 @@ app.get('/home', (req, res) => {
 });
 
 
+app.use('/api', razorpayRoutes);
 
 app.get("/", (req, res) => res.send("Livagain-Server in on Vercel")); 
 // Start Server
@@ -135,7 +149,6 @@ app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
 });
 
-app.use('/api', razorpayRoutes);
 
 
 module.exports = app

@@ -49,9 +49,12 @@ const ensureWalletExists = async (req, res, next) => {
       res.status(500).send('Server Error');
     }
 };
+
+// Apply auth middleware to routes
+router.use(auth);
   
 // Get wallet balance and transactions
-router.post('/api/wallet', auth,ensureWalletExists, async (req, res) => {
+router.get('/api/wallet', auth,ensureWalletExists, async (req, res) => {
     try {
       const userId = req.user.uid;
       const walletRef = admin.firestore().collection('wallets').doc(userId);
@@ -83,7 +86,7 @@ router.post('/api/wallet', auth,ensureWalletExists, async (req, res) => {
   });
   
   // Add money to wallet
-  router.post('/api/wallet/add', auth, async (req, res) => {
+  router.post('/api/wallet/add', auth,ensureWalletExists, async (req, res) => {
     const userId = req.user.uid;
     const { amount } = req.body;
   
@@ -122,7 +125,8 @@ router.post('/api/wallet', auth,ensureWalletExists, async (req, res) => {
   });
   
  // Create Razorpay Order Endpoint
-router.post('/api/create-razorpay-order', async (req, res) => {
+router.post('/api/create-razorpay-order',auth,ensureWalletExists, async (req, res) => {
+    console.log("creating order");
     try {
       const { amount } = req.body;
       
@@ -139,6 +143,7 @@ router.post('/api/create-razorpay-order', async (req, res) => {
       };
   
       const order = await razorpay.orders.create(options);
+      console.log("order - ",order);
       res.json({
         id: order.id,
         currency: order.currency,
@@ -152,7 +157,8 @@ router.post('/api/create-razorpay-order', async (req, res) => {
   });
   
   // Verify Payment Endpoint
-  router.post('/api/verify-payment', async (req, res) => {
+  router.post('/api/verify-payment', auth,ensureWalletExists, async (req, res) => {
+    console.log("verifying");
     try {
       const { paymentId, amount } = req.body;
       const userId = req.user.uid; // From auth middleware
@@ -199,6 +205,7 @@ router.post('/api/create-razorpay-order', async (req, res) => {
         });
       });
   
+      console.log("payment - ",payment, "balance - ",newBalance);
       res.json({ success: true, newBalance });
   
     } catch (error) {
@@ -207,7 +214,5 @@ router.post('/api/create-razorpay-order', async (req, res) => {
     }
   });
 
-// Apply auth middleware to routes
-router.use(auth);
 
 module.exports = router;
