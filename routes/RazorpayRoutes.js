@@ -25,6 +25,7 @@ module.exports = (admin) => {
       token = authHeader.split(' ')[1];
       const decodedToken = await admin.auth().verifyIdToken(token);
       req.user = { uid: decodedToken.uid };
+      console.log('authentcating DONE ', decodedToken.uid);
       next();
     } catch (error) {
         console.error('Auth Error Details:', {
@@ -32,18 +33,24 @@ module.exports = (admin) => {
             errorCode: error.code,
             errorMessage: error.message
           });
-      res.status(401).send('Unauthorized');
+          return res.status(401).json({ 
+            error: 'Authentication failed',
+            details: error.code === 'auth/id-token-expired' 
+              ? 'Session expired' 
+              : 'Invalid credentials'
+          });
     }
   };  
 
 // Add this middleware to create wallet if not exists
 const ensureWalletExists = async (req, res, next) => {
-    console.log('ensure wallet');
+    console.log('Ensuring wallet exists...');
     try {
       const walletRef = admin.firestore().collection('wallets').doc(req.user.uid);
       const doc = await walletRef.get();
       
       if (!doc.exists) {
+        console.log('Creating new wallet for:', req.user.uid);
         await walletRef.set({
           balance: 0,
           userId: req.user.uid,
@@ -63,7 +70,7 @@ const ensureWalletExists = async (req, res, next) => {
 router.use(auth);
   
 // Get wallet balance and transactions
-router.get('/api/wallet', auth,ensureWalletExists, async (req, res) => {
+router.get('/wallet',ensureWalletExists, async (req, res) => {
     console.log("WALLET Creation");
     try {
       const userId = req.user.uid;
@@ -96,7 +103,7 @@ router.get('/api/wallet', auth,ensureWalletExists, async (req, res) => {
   });
   
   // Add money to wallet
-  router.post('/api/wallet/add', auth,ensureWalletExists, async (req, res) => {
+  router.post('/wallet/add',ensureWalletExists, async (req, res) => {
     const userId = req.user.uid;
     const { amount } = req.body;
   
@@ -135,7 +142,7 @@ router.get('/api/wallet', auth,ensureWalletExists, async (req, res) => {
   });
   
  // Create Razorpay Order Endpoint
-router.post('/api/create-razorpay-order',auth,ensureWalletExists, async (req, res) => {
+router.post('/create-razorpay-order',ensureWalletExists, async (req, res) => {
     console.log("creating order");
     try {
       const { amount } = req.body;
@@ -167,7 +174,7 @@ router.post('/api/create-razorpay-order',auth,ensureWalletExists, async (req, re
   });
   
   // Verify Payment Endpoint
-  router.post('/api/verify-payment', auth,ensureWalletExists, async (req, res) => {
+  router.post('/verify-payment',ensureWalletExists, async (req, res) => {
     console.log("verifying");
     try {
       const { paymentId, amount } = req.body;
