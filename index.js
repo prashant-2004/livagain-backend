@@ -62,9 +62,7 @@ app.post('/send-fcm', async (req, res) => {
         senderId: senderId,
         anotherUserId: anotherUserId,
         isMentor: String(senderData.isMentor),
-        senderName: senderData.name,
-        sessionId:sessionId,
-        sessionDuration:sessionDuration
+        senderName: senderData.name
       },
     };
     console.log(message);
