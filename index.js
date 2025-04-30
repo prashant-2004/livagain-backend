@@ -67,6 +67,7 @@ app.post('/send-fcm', async (req, res) => {
         sessionDuration:sessionDuration
       },
     };
+    console.log(message);
 
     const response = await admin.messaging().send(message);
     console.log('FCM Response:', response);
