@@ -48,7 +48,7 @@ app.use(cors(corsOptions));
 // FCM Send Endpoint for Chatting
 app.post('/send-fcm', async (req, res) => {
   try {
-    const { recipientToken, messageText,senderData, anotherUserId, senderId, chatRoomId } = req.body;
+    const { recipientToken, messageText,senderData, anotherUserId, senderId, chatRoomId, sessionId, sessionDuration } = req.body;
 
     const message = {
       token: recipientToken,
@@ -63,6 +63,8 @@ app.post('/send-fcm', async (req, res) => {
         anotherUserId: anotherUserId,
         isMentor: String(senderData.isMentor),
         senderName: senderData.name,
+        sessionId:sessionId,
+        sessionDuration:sessionDuration
       },
     };
 

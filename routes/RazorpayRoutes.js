@@ -159,7 +159,7 @@ router.post('/create-razorpay-order',ensureWalletExists, async (req, res) => {
         payment_capture: 1
       };
   
-      const order = await razorpay.orders.create(options)
+      const order = await razorpay.orders.create(options);
       
       console.log("order - ",order);
       res.json({
