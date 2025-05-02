@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const razorpayRoutes = require('./routes/RazorpayRoutes');
+import { createTransport } from 'nodemailer';
 require('dotenv').config();
 const corsOptions = {
   origin: ['http://localhost:8081', 'http://192.168.1.*'],
@@ -35,7 +36,7 @@ admin.initializeApp({
 //   });
 
 const app = express();
-// app.use(cors());
+app.use(cors({origin: true}));
 app.use(express.json());
 app.use((req, res, next) => {
   console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
@@ -44,6 +45,53 @@ app.use((req, res, next) => {
 });
 
 app.use(cors(corsOptions));
+
+// Email configuration
+const transporter = createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.GMAIL_EMAIL,
+    pass: process.env.GMAIL_PASSWORD
+  }
+});
+
+
+// Email endpoint
+app.post('/send-status-email', async (req, res) => {
+  try {
+    const { to, status, remark } = req.body;
+
+    if (!to || !status) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const mailOptions = {
+      from: 'Mentor Verification <noreply@connectora.in>',
+      to,
+      subject: status === 'verified' 
+        ? 'Your Mentor Profile Has Been Verified!' 
+        : 'Mentor Profile Verification Rejected',
+      html: status === 'verified' ? `
+        <h2>Congratulations! Your mentor profile has been verified</h2>
+        <p>You can now start receiving and responding to student requests.</p>
+        <p>Login to your account to get started!</p>
+      ` : `
+        <h2>Profile Verification Rejected</h2>
+        <p>Your mentor profile verification was rejected for the following reason:</p>
+        <blockquote>${remark || 'No reason provided'}</blockquote>
+        <p>Please update your profile and resubmit for verification.</p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    res.json({ success: true });
+    
+  } catch (error) {
+    console.error('Email sending error:', error);
+    res.status(500).json({ error: 'Failed to send email' });
+  }
+});
+
 
 // FCM Send Endpoint for Chatting
 app.post('/send-fcm', async (req, res) => {
