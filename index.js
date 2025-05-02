@@ -98,6 +98,7 @@ app.post('/send-question-notification', async (req, res) => {
     // Get all mentors who haven't rejected this question
     const mentorsSnapshot = await admin.firestore()
       .collection('mentors')
+      .where('status','==','verified')
       .get();
 
     const tokens = [];
