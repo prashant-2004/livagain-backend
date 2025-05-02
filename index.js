@@ -55,6 +55,8 @@ const transporter = createTransport({
   }
 });
 
+console.log(process.env.GMAIL_EMAIL, process.env.GMAIL_PASSWORD);
+
 
 // Email endpoint
 app.post('/send-status-email', async (req, res) => {
