@@ -5,7 +5,7 @@ const razorpayRoutes = require('./routes/RazorpayRoutes');
 import { createTransport } from 'nodemailer';
 require('dotenv').config();
 const corsOptions = {
-  origin: ['http://localhost:8081', 'http://192.168.1.*'],
+  // origin: ['http://localhost:8081', 'http://192.168.1.*',['https://*']],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   allowedHeaders: ['Content-Type', 'Authorization']
 };
