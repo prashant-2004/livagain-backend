@@ -190,29 +190,28 @@ app.post('/send-question-notification', async (req, res) => {
 
 app.post('/send-incoming-audio-call', async (req, res) => {
   try {
-    const { mentorId, channelId, agoraToken, callerName } = req.body;
-    if (!mentorId || !channelId || !agoraToken || !callerName) {
+    const { mentorId, mentorToken, channelId, agoraToken } = req.body;
+    if (!mentorId || !channelId || !agoraToken) {
       return res.status(400).json({ error: 'missing fields' });
     }
 
     // 1) lookup mentor’s FCM token
-    const userDoc = await db.collection('users').doc(mentorId).get();
-    const fcmToken = userDoc.get('fcmToken');
-    if (!fcmToken) {
-      return res.status(404).json({ error: 'no fcmToken for that mentor' });
-    }
+    // const userDoc = await db.collection('mentors').doc(mentorId).get();
+    // const fcmToken = userDoc.get('fcmToken');
+    // if (!fcmToken) {
+    //   return res.status(404).json({ error: 'no fcmToken for that mentor' });
+    // }
 
     // 2) send the push
     await fcm.send({
-      token: fcmToken,
+      token: mentorToken,
       data: {
         type:'INCOMING_AUDIO_CALL',
         channelId,
         agoraToken,
-        callerName,
       },
       notification: {
-        title: `Incoming call from ${callerName}`,
+        title: `Incoming call from Your Student`,
         body:  `Tap to answer`,
       },
     });
