@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const admin = require('firebase-admin');
 const razorpayRoutes = require('./routes/RazorpayRoutes');
-import { createTransport } from 'nodemailer';
+// import { createTransport } from 'nodemailer';
+const {createTransport} = require('nodemailer');
 require('dotenv').config();
 const corsOptions = {
   // origin: ['http://localhost:8081', 'http://192.168.1.*',['https://*']],
@@ -184,6 +185,42 @@ app.post('/send-question-notification', async (req, res) => {
 
   } catch (error) {
     res.status(500).send('Error sending notifications');
+  }
+});
+
+app.post('/send-incoming-audio-call', async (req, res) => {
+  try {
+    const { mentorId, channelId, agoraToken, callerName } = req.body;
+    if (!mentorId || !channelId || !agoraToken || !callerName) {
+      return res.status(400).json({ error: 'missing fields' });
+    }
+
+    // 1) lookup mentor’s FCM token
+    const userDoc = await db.collection('users').doc(mentorId).get();
+    const fcmToken = userDoc.get('fcmToken');
+    if (!fcmToken) {
+      return res.status(404).json({ error: 'no fcmToken for that mentor' });
+    }
+
+    // 2) send the push
+    await fcm.send({
+      token: fcmToken,
+      data: {
+        type:'INCOMING_AUDIO_CALL',
+        channelId,
+        agoraToken,
+        callerName,
+      },
+      notification: {
+        title: `Incoming call from ${callerName}`,
+        body:  `Tap to answer`,
+      },
+    });
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('send-incoming-call:', err);
+    res.status(500).json({ error: err.message });
   }
 });
 
