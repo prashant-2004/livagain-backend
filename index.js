@@ -203,7 +203,7 @@ app.post('/send-incoming-audio-call', async (req, res) => {
     // }
 
     // 2) send the push
-    await fcm.send({
+    await admin.messaging().send({
       token: mentorToken,
       data: {
         type:'INCOMING_AUDIO_CALL',
